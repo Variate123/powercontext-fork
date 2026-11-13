@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import math
 from pathlib import Path
 from urllib.parse import quote
 
@@ -262,17 +263,33 @@ async def search_pdf_pages(memory, question: str, limit: int = 10) -> tuple["Mem
             if variant_index == 0:
                 candidate["full_rank"] = min(int(candidate["full_rank"]), rank)
 
+    candidate_terms: dict[tuple[str, str, str], set[str]] = {}
+    term_documents: dict[str, int] = {}
+    for key, candidate in candidates.items():
+        text = candidate["text"]
+        assert isinstance(text, str)
+        terms_in_page = set(analyze_text(text).split())
+        candidate_terms[key] = terms_in_page
+        for term in terms_in_page.intersection(terms):
+            term_documents[term] = term_documents.get(term, 0) + 1
+
     ranked: list[tuple[float, MemoryCitation, tuple[str, str]]] = []
-    for candidate in candidates.values():
+    document_count = max(len(candidate_terms), 1)
+    for candidate_key, candidate in candidates.items():
         citation = candidate["citation"]
         assert isinstance(citation, MemoryCitation)
         text = candidate["text"]
         assert isinstance(text, str)
-        page_terms = set(analyze_text(text).split())
-        overlap = len(page_terms.intersection(terms))
+        page_terms = candidate_terms[candidate_key]
+        overlap_terms = page_terms.intersection(terms)
+        overlap = len(overlap_terms)
+        weighted_overlap = sum(
+            math.log((document_count + 1) / (term_documents.get(term, 0) + 1))
+            for term in overlap_terms
+        )
         # Overlap is the primary signal; variant rank breaks ties in favour of
         # pages returned by the full question and several focused searches.
-        score = overlap * 100.0 + float(candidate["variant_score"]) * 10.0
+        score = weighted_overlap * 100.0 + overlap * 5.0 + float(candidate["variant_score"]) * 10.0
         score -= int(candidate["full_rank"]) / 10_000.0
         entry = await memory.get(GetMemoryEntryRequest(citation=citation))
         references = tuple(reference for reference in entry.entry.sources if reference.source_type == PDF_PAGE_SOURCE_NAME)
