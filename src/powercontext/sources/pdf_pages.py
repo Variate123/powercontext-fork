@@ -236,6 +236,9 @@ async def search_pdf_pages(memory, question: str, limit: int = 10) -> tuple["Mem
         variants.append(head)
         if tail != head:
             variants.append(tail)
+        for term in sorted(terms, key=lambda item: (-len(item), item))[:2]:
+            if term not in variants:
+                variants.append(term)
 
     candidate_limit = max(limit * 6, 120)
     candidates: dict[tuple[str, str, str], dict[str, object]] = {}
