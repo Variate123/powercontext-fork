@@ -87,7 +87,9 @@ def pi_event_source_id(session_id: str, event_id: str) -> str:
     if len(encoded) <= MAX_SOURCE_ID_LENGTH:
         return encoded
     digest = hashlib.sha256((session_id + "\0" + event_id).encode("utf-8")).hexdigest()
-    return f"pi:sha256:{digest}"
+    # Keep the long-component form in a namespace that cannot be produced by
+    # the two-component ``pi:<session>:<event>`` form.
+    return f"pi-hash:{digest}"
 
 
 def _json_load(line: bytes) -> object:
@@ -187,6 +189,8 @@ def _visible_event(session_id: str, record: dict[str, JsonValue], parent_id: str
                 command = str(command)
             if not isinstance(output, str):
                 output = str(output)
+            if command == "" and output == "":
+                return None
             body = f"$ {command}\n{output}"
         else:
             body = _visible_content(message.get("content"))
