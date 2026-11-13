@@ -238,7 +238,7 @@ async def search_pdf_pages(memory, question: str, limit: int = 10) -> tuple["Mem
         if tail not in variants:
             variants.append(tail)
 
-    candidate_limit = max(limit * 6, 80)
+    candidate_limit = max(limit * 10, 200)
     candidates: dict[tuple[str, str, str], dict[str, object]] = {}
     for variant_index, variant in enumerate(variants):
         page = await memory.search(SearchMemoryRequest(query=variant, mode="fts", limit=candidate_limit))
