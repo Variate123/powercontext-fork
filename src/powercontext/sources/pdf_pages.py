@@ -219,28 +219,76 @@ async def search_pdf_pages(memory, question: str, limit: int = 10) -> tuple["Mem
     # Imported lazily because ``powercontext.sources`` is itself used while the
     # artifact model package is being initialized.
     from powercontext.artifacts import MemoryCitation
+    from powercontext.builtin.artifacts.search import analyze_fts_query, analyze_text
     from powercontext.builtin.runtime.models import GetMemoryEntryRequest, SearchMemoryRequest
 
-    # Retrieve a broad lexical pool, then inspect each entry's Source references to
-    # deduplicate pages. The entry and citation remain entirely Memory-owned.
-    page = await memory.search(SearchMemoryRequest(query=question, mode="fts", limit=max(limit * 10, 100)))
-    results: list[MemoryCitation] = []
-    seen_pages: set[tuple[str, str]] = set()
-    for hit in page.hits:
-        citation = MemoryCitation(
-            memory_ref=hit.memory_ref,
-            entry_id=hit.entry_id,
-            entry_version_id=hit.entry_version_id,
+    # A long natural-language question can contain many terms that are absent from
+    # its evidence page. The Memory FTS admission floor intentionally rejects such a
+    # candidate, so search the complete question and overlapping three-term windows.
+    # Every candidate and final citation still comes from the scoped Memory API.
+    terms = tuple(dict.fromkeys(analyze_fts_query(question).split()))
+    variants: list[str] = [question]
+    if len(terms) > 3:
+        variants.extend(
+            " ".join(terms[index : index + 3])
+            for index in range(0, len(terms) - 2, 2)
         )
+        tail = " ".join(terms[-3:])
+        if tail not in variants:
+            variants.append(tail)
+
+    candidate_limit = max(limit * 6, 80)
+    candidates: dict[tuple[str, str, str], dict[str, object]] = {}
+    for variant_index, variant in enumerate(variants):
+        page = await memory.search(SearchMemoryRequest(query=variant, mode="fts", limit=candidate_limit))
+        for rank, hit in enumerate(page.hits):
+            key = (str(hit.memory_ref), hit.entry_id, hit.entry_version_id)
+            candidate = candidates.setdefault(
+                key,
+                {
+                    "citation": MemoryCitation(
+                        memory_ref=hit.memory_ref,
+                        entry_id=hit.entry_id,
+                        entry_version_id=hit.entry_version_id,
+                    ),
+                    "text": hit.text,
+                    "variant_score": 0.0,
+                    "full_rank": 10_000,
+                },
+            )
+            candidate["variant_score"] = float(candidate["variant_score"]) + 1.0 / (
+                (variant_index + 1) * (rank + 1)
+            )
+            if variant_index == 0:
+                candidate["full_rank"] = min(int(candidate["full_rank"]), rank)
+
+    ranked: list[tuple[float, MemoryCitation, tuple[str, str]]] = []
+    for candidate in candidates.values():
+        citation = candidate["citation"]
+        assert isinstance(citation, MemoryCitation)
+        text = candidate["text"]
+        assert isinstance(text, str)
+        page_terms = set(analyze_text(text).split())
+        overlap = len(page_terms.intersection(terms))
+        # Overlap is the primary signal; variant rank breaks ties in favour of
+        # pages returned by the full question and several focused searches.
+        score = overlap * 100.0 + float(candidate["variant_score"]) * 10.0
+        score -= int(candidate["full_rank"]) / 10_000.0
         entry = await memory.get(GetMemoryEntryRequest(citation=citation))
         references = tuple(reference for reference in entry.entry.sources if reference.source_type == PDF_PAGE_SOURCE_NAME)
-        for reference in references:
-            identity = (reference.source_type, reference.source_id)
-            if identity in seen_pages:
-                continue
-            seen_pages.add(identity)
-            results.append(citation)
-            break
+        if not references:
+            continue
+        page_identity = (references[0].source_type, references[0].source_id)
+        ranked.append((score, citation, page_identity))
+
+    ranked.sort(key=lambda row: (-row[0], row[2]))
+    results: list[MemoryCitation] = []
+    seen_pages: set[tuple[str, str]] = set()
+    for _score, citation, page_identity in ranked:
+        if page_identity in seen_pages:
+            continue
+        seen_pages.add(page_identity)
+        results.append(citation)
         if len(results) >= limit:
             break
     return tuple(results)
