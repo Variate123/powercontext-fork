@@ -103,7 +103,10 @@ def parse_pdf_document(value: PDFDocumentInput) -> tuple[PDFPageInput, ...]:
         raise ValueError("PDF content must not be empty")
     digest = hashlib.sha256(value.content).hexdigest()
     try:
-        reader = PdfReader(io.BytesIO(value.content), strict=True)
+        # Financial filings can contain harmless xref/producer quirks. pypdf's
+        # tolerant reader still raises for truncated or unreadable documents,
+        # while allowing those valid filings to be fully traversed.
+        reader = PdfReader(io.BytesIO(value.content), strict=False)
         if reader.is_encrypted:
             result = reader.decrypt("")
             if not result:
