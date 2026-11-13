@@ -52,6 +52,20 @@ from powercontext.sources.observations import (
     project_source_for_transport,
 )
 from powercontext.sources.projections import TEXT_EVIDENCE_PROJECTION_KEY, TextEvidence
+from powercontext.sources.pi_session import (
+    PI_EVENT_SOURCE_ADAPTER,
+    PI_EVENT_SOURCE_DEFINITION,
+    PI_EVENT_SOURCE_NAME,
+    PI_SESSION_CONNECTOR_NAME,
+    PiEventInput,
+    PiEventSource,
+    PiEventSourceAdapter,
+    PiEventTextEvidenceProjection,
+    PiSessionConnector,
+    PiSessionInput,
+    parse_pi_session,
+    pi_event_source_id,
+)
 from powercontext.sources.protocols import SourceCatalogBackend, SourceStore
 
 __all__ = [
@@ -64,6 +78,10 @@ __all__ = [
     "CSV_ROW_SOURCE_DEFINITION",
     "CSV_ROW_SOURCE_NAME",
     "TEXT_EVIDENCE_PROJECTION_KEY",
+    "PI_EVENT_SOURCE_ADAPTER",
+    "PI_EVENT_SOURCE_DEFINITION",
+    "PI_EVENT_SOURCE_NAME",
+    "PI_SESSION_CONNECTOR_NAME",
     "AdapterSourceDefinition",
     "Connector",
     "ConnectorBinding",
@@ -89,8 +107,16 @@ __all__ = [
     "SourceRef",
     "SourceStore",
     "TextEvidence",
+    "PiEventInput",
+    "PiEventSource",
+    "PiEventSourceAdapter",
+    "PiEventTextEvidenceProjection",
+    "PiSessionConnector",
+    "PiSessionInput",
     "csv_row_source_id",
     "manifest_for_definition",
     "project_source_for_transport",
     "parse_csv_document",
+    "parse_pi_session",
+    "pi_event_source_id",
 ]
