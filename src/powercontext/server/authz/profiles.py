@@ -54,17 +54,6 @@ class ArtifactFamilyAccessProfile:
 
 
 ARTIFACT_FAMILY_PROFILES: dict[str, ArtifactFamilyAccessProfile] = {
-    "atomic-memory": ArtifactFamilyAccessProfile(
-        family="atomic-memory",
-        enabled=True,
-        share_unit="artifact",
-        shareable_states=frozenset({"active", "forgotten", "merged", "retired"}),
-        base_action=AccessAction.ARTIFACT_READ,
-        additional_actions=frozenset(),
-        grantable_roles=frozenset({AccessRole.ARTIFACT_VIEWER}),
-        selector="forbidden",
-        mutation_semantics=frozenset({AccessAction.ARTIFACT_WRITE}),
-    ),
     "handoff": ArtifactFamilyAccessProfile(
         family="handoff",
         enabled=True,
@@ -140,23 +129,6 @@ ARTIFACT_FAMILY_PROFILES: dict[str, ArtifactFamilyAccessProfile] = {
 }
 
 
-def register_custom_artifact_access_family(family: str) -> None:
-    """Use framework-owned read/write semantics for a persisted custom family."""
-
-    if family not in ARTIFACT_FAMILY_PROFILES:
-        ARTIFACT_FAMILY_PROFILES[family] = ArtifactFamilyAccessProfile(
-            family=family,
-            enabled=True,
-            share_unit="artifact",
-            shareable_states=frozenset(),
-            base_action=AccessAction.ARTIFACT_READ,
-            additional_actions=frozenset(),
-            grantable_roles=frozenset(),
-            selector="forbidden",
-            mutation_semantics=frozenset({AccessAction.ARTIFACT_WRITE}),
-        )
-
-
 def artifact_family_profile(resource: ResourceRef) -> ArtifactFamilyAccessProfile:
     """Validate an exact Artifact resource and return its enabled profile."""
 
@@ -190,7 +162,6 @@ def validate_action_resource(action: AccessAction, resource: ResourceRef, *, dep
             AccessAction.SCOPE_REVIEW,
             AccessAction.SCOPE_DELEGATE,
             AccessAction.SCOPE_ADMIN,
-            AccessAction.GATEWAY_INVOKE,
         }:
             raise AccessInvalidRequestError("action-resource")
         return
@@ -213,7 +184,6 @@ def validate_binding_role(resource: ResourceRef, role: AccessRole, *, deployment
             AccessRole.SCOPE_REVIEWER,
             AccessRole.SCOPE_DELEGATOR,
             AccessRole.SCOPE_ADMIN,
-            AccessRole.GATEWAY_USER,
         }:
             raise AccessInvalidRequestError("binding-role")
         return

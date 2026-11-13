@@ -24,22 +24,25 @@ from powercontext.sources.connectors import (
     ConnectorRunStatus,
     ConnectorSubmissionStatus,
 )
+from powercontext.sources.csv_rows import (
+    CSVDocumentInput,
+    CSVRowInput,
+    CSVRowSource,
+    CSVRowSourceAdapter,
+    CSVRowTextEvidenceProjection,
+    CSV_ROW_SOURCE_ADAPTER,
+    CSV_ROW_SOURCE_DEFINITION,
+    CSV_ROW_SOURCE_NAME,
+    csv_row_source_id,
+    parse_csv_document,
+)
 from powercontext.sources.definitions import (
     AdapterSourceDefinition,
     SourceDefinition,
     SourceDefinitionRegistry,
     SourceProjection,
 )
-from powercontext.sources.evidence import MemoryEvidenceDeclaration, SourceEvidence
-from powercontext.sources.models import (
-    Source,
-    SourceLineRangeLocator,
-    SourceLocator,
-    SourceMaterialization,
-    SourceProjectionKey,
-    SourceRef,
-    SourceSequenceLocator,
-)
+from powercontext.sources.models import Source, SourceMaterialization, SourceProjectionKey, SourceRef
 from powercontext.sources.observations import (
     SourceDefinitionManifest,
     SourceObservation,
@@ -48,15 +51,18 @@ from powercontext.sources.observations import (
     manifest_for_definition,
     project_source_for_transport,
 )
-from powercontext.sources.projections import (
-    TEXT_EVIDENCE_PROJECTION_KEY,
-    LocatedTextEvidence,
-    TextEvidence,
-    TextEvidenceV1,
-)
+from powercontext.sources.projections import TEXT_EVIDENCE_PROJECTION_KEY, TextEvidence
 from powercontext.sources.protocols import SourceCatalogBackend, SourceStore
 
 __all__ = [
+    "CSVDocumentInput",
+    "CSVRowInput",
+    "CSVRowSource",
+    "CSVRowSourceAdapter",
+    "CSVRowTextEvidenceProjection",
+    "CSV_ROW_SOURCE_ADAPTER",
+    "CSV_ROW_SOURCE_DEFINITION",
+    "CSV_ROW_SOURCE_NAME",
     "TEXT_EVIDENCE_PROJECTION_KEY",
     "AdapterSourceDefinition",
     "Connector",
@@ -67,8 +73,6 @@ __all__ = [
     "ConnectorRunSession",
     "ConnectorRunStatus",
     "ConnectorSubmissionStatus",
-    "LocatedTextEvidence",
-    "MemoryEvidenceDeclaration",
     "Source",
     "SourceAdapter",
     "SourceCatalog",
@@ -76,9 +80,6 @@ __all__ = [
     "SourceDefinition",
     "SourceDefinitionManifest",
     "SourceDefinitionRegistry",
-    "SourceEvidence",
-    "SourceLineRangeLocator",
-    "SourceLocator",
     "SourceMaterialization",
     "SourceObservation",
     "SourceProjection",
@@ -86,10 +87,10 @@ __all__ = [
     "SourceProjectionManifest",
     "SourceProjectionValue",
     "SourceRef",
-    "SourceSequenceLocator",
     "SourceStore",
     "TextEvidence",
-    "TextEvidenceV1",
+    "csv_row_source_id",
     "manifest_for_definition",
     "project_source_for_transport",
+    "parse_csv_document",
 ]

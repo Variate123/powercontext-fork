@@ -14,8 +14,8 @@
 
 """Server-owned authentication and authorization building blocks."""
 
-from typing import TYPE_CHECKING
-
+from powercontext.server.authz.authzen import AuthZenAuthorizationProvider
+from powercontext.server.authz.casbin import CasbinAuthorizationProvider
 from powercontext.server.authz.errors import (
     AccessBindingNotFoundError,
     AccessConflictError,
@@ -25,7 +25,6 @@ from powercontext.server.authz.errors import (
     AccessInvalidRequestError,
     AccessUnavailableError,
 )
-from powercontext.server.authz.keys import IDEMPOTENCY_KEY_LIMIT, bounded_idempotency_key
 from powercontext.server.authz.models import (
     DEFAULT_DEPLOYMENT_ID,
     PUBLIC_ACCESS_ACTIONS,
@@ -64,7 +63,6 @@ from powercontext.server.authz.service import (
     BindingSearchRequest,
     BuiltinAuthorizationProvider,
     CreateBinding,
-    IdempotentAccessAuditStore,
     RelationshipReader,
     RelationshipStore,
     RelationshipWriter,
@@ -73,28 +71,8 @@ from powercontext.server.authz.service import (
     access_control_for_mode,
 )
 
-if TYPE_CHECKING:
-    from powercontext.server.authz.authzen import AuthZenAuthorizationProvider
-    from powercontext.server.authz.casbin import CasbinAuthorizationProvider
-
-
-def __getattr__(name: str) -> object:
-    # Runtime consumers use the shared Access contract without selecting a Server provider.
-    if name == "AuthZenAuthorizationProvider":
-        from powercontext.server.authz.authzen import AuthZenAuthorizationProvider
-
-        return AuthZenAuthorizationProvider
-    if name == "CasbinAuthorizationProvider":
-        from powercontext.server.authz.casbin import CasbinAuthorizationProvider
-
-        return CasbinAuthorizationProvider
-    message = f"module {__name__!r} has no attribute {name!r}"
-    raise AttributeError(message)
-
-
 __all__ = (
     "DEFAULT_DEPLOYMENT_ID",
-    "IDEMPOTENCY_KEY_LIMIT",
     "PUBLIC_ACCESS_ACTIONS",
     "ROLE_CARDINALITIES",
     "AccessAction",
@@ -135,7 +113,6 @@ __all__ = (
     "CreateBinding",
     "GroupRef",
     "HandoffReceiptIdentity",
-    "IdempotentAccessAuditStore",
     "MemoryEntrySelector",
     "PrincipalRef",
     "RelationshipReader",
@@ -145,5 +122,4 @@ __all__ = (
     "ResourceRef",
     "ResourceSearchRequest",
     "access_control_for_mode",
-    "bounded_idempotency_key",
 )

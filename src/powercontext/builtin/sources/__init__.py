@@ -18,13 +18,24 @@ from powercontext.builtin.sources.content import (
     CONTENT_SOURCE_ADAPTER,
     CONTENT_SOURCE_DEFINITION,
     CONTENT_SOURCE_NAME,
-    WORKING_NOTE_SOURCE_KIND,
     ContentCapture,
     ContentSource,
     ContentSourceAdapter,
     ContentSourceInternal,
     ContentSourceTarget,
     ContentTextEvidenceProjection,
+)
+from powercontext.sources.csv_rows import (
+    CSVDocumentInput,
+    CSVRowInput,
+    CSVRowSource,
+    CSVRowSourceAdapter,
+    CSVRowTextEvidenceProjection,
+    CSV_ROW_SOURCE_ADAPTER,
+    CSV_ROW_SOURCE_DEFINITION,
+    CSV_ROW_SOURCE_NAME,
+    csv_row_source_id,
+    parse_csv_document,
 )
 from powercontext.builtin.sources.external_skill import (
     EXTERNAL_SKILL_SNAPSHOT_SOURCE_ADAPTER,
@@ -71,6 +82,14 @@ BUILTIN_SOURCE_REGISTRY = SourceDefinitionRegistry((
 
 __all__ = [
     "BUILTIN_SOURCE_REGISTRY",
+    "CSVDocumentInput",
+    "CSVRowInput",
+    "CSVRowSource",
+    "CSVRowSourceAdapter",
+    "CSVRowTextEvidenceProjection",
+    "CSV_ROW_SOURCE_ADAPTER",
+    "CSV_ROW_SOURCE_DEFINITION",
+    "CSV_ROW_SOURCE_NAME",
     "CONTENT_SOURCE_ADAPTER",
     "CONTENT_SOURCE_DEFINITION",
     "CONTENT_SOURCE_NAME",
@@ -84,7 +103,6 @@ __all__ = [
     "SKILL_USAGE_SOURCE_DEFINITION",
     "SKILL_USAGE_SOURCE_NAME",
     "TEXT_EVIDENCE_PROJECTION_KEY",
-    "WORKING_NOTE_SOURCE_KIND",
     "ContentCapture",
     "ContentSource",
     "ContentSourceAdapter",
@@ -108,5 +126,7 @@ __all__ = [
     "SourceJournal",
     "SourceJournalEntry",
     "TextEvidence",
+    "csv_row_source_id",
+    "parse_csv_document",
     "validate_scope_id",
 ]
