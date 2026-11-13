@@ -123,8 +123,6 @@ def parse_pdf_document(value: PDFDocumentInput) -> tuple[PDFPageInput, ...]:
                     text=text,
                 )
             )
-        if not pages:
-            raise ValueError("PDF contains no pages")
         return tuple(pages)
     except ValueError:
         raise
