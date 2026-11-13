@@ -66,6 +66,19 @@ from powercontext.sources.pi_session import (
     parse_pi_session,
     pi_event_source_id,
 )
+from powercontext.sources.pdf_pages import (
+    PDFDocumentInput,
+    PDFPageInput,
+    PDFPageSource,
+    PDFPageSourceAdapter,
+    PDFPageTextEvidenceProjection,
+    PDF_PAGE_SOURCE_ADAPTER,
+    PDF_PAGE_SOURCE_DEFINITION,
+    PDF_PAGE_SOURCE_NAME,
+    parse_pdf_document,
+    pdf_page_source_id,
+    search_pdf_pages,
+)
 from powercontext.sources.protocols import SourceCatalogBackend, SourceStore
 
 __all__ = [
@@ -82,6 +95,9 @@ __all__ = [
     "PI_EVENT_SOURCE_DEFINITION",
     "PI_EVENT_SOURCE_NAME",
     "PI_SESSION_CONNECTOR_NAME",
+    "PDF_PAGE_SOURCE_ADAPTER",
+    "PDF_PAGE_SOURCE_DEFINITION",
+    "PDF_PAGE_SOURCE_NAME",
     "AdapterSourceDefinition",
     "Connector",
     "ConnectorBinding",
@@ -113,10 +129,18 @@ __all__ = [
     "PiEventTextEvidenceProjection",
     "PiSessionConnector",
     "PiSessionInput",
+    "PDFDocumentInput",
+    "PDFPageInput",
+    "PDFPageSource",
+    "PDFPageSourceAdapter",
+    "PDFPageTextEvidenceProjection",
     "csv_row_source_id",
     "manifest_for_definition",
     "project_source_for_transport",
     "parse_csv_document",
     "parse_pi_session",
     "pi_event_source_id",
+    "parse_pdf_document",
+    "pdf_page_source_id",
+    "search_pdf_pages",
 ]
