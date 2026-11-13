@@ -223,17 +223,15 @@ async def search_pdf_pages(memory, question: str, limit: int = 10) -> tuple["Mem
 
     # A long natural-language question can contain many terms that are absent from
     # its evidence page. The Memory FTS admission floor intentionally rejects such a
-    # candidate, so search the complete question and overlapping three-term windows.
+    # candidate, so search the complete question plus compact head/tail term sets.
     # Every candidate and final citation still comes from the scoped Memory API.
     terms = tuple(dict.fromkeys(analyze_fts_query(question).split()))
     variants: list[str] = [question]
-    if len(terms) > 3:
-        variants.extend(
-            " ".join(terms[index : index + 3])
-            for index in range(0, len(terms) - 2, 3)
-        )
-        tail = " ".join(terms[-3:])
-        if tail not in variants:
+    if len(terms) > 8:
+        head = " ".join(terms[:8])
+        tail = " ".join(terms[-8:])
+        variants.append(head)
+        if tail != head:
             variants.append(tail)
 
     candidate_limit = max(limit * 6, 120)
