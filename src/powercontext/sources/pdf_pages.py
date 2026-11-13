@@ -230,13 +230,13 @@ async def search_pdf_pages(memory, question: str, limit: int = 10) -> tuple["Mem
     if len(terms) > 3:
         variants.extend(
             " ".join(terms[index : index + 3])
-            for index in range(0, len(terms) - 2, 2)
+            for index in range(0, len(terms) - 2, 3)
         )
         tail = " ".join(terms[-3:])
         if tail not in variants:
             variants.append(tail)
 
-    candidate_limit = max(limit * 10, 200)
+    candidate_limit = max(limit * 6, 120)
     candidates: dict[tuple[str, str, str], dict[str, object]] = {}
     for variant_index, variant in enumerate(variants):
         page = await memory.search(SearchMemoryRequest(query=variant, mode="fts", limit=candidate_limit))
@@ -271,7 +271,7 @@ async def search_pdf_pages(memory, question: str, limit: int = 10) -> tuple["Mem
         for term in terms_in_page.intersection(terms):
             term_documents[term] = term_documents.get(term, 0) + 1
 
-    ranked: list[tuple[float, MemoryCitation, tuple[str, str]]] = []
+    ranked_candidates: list[tuple[float, MemoryCitation]] = []
     document_count = max(len(candidate_terms), 1)
     for candidate_key, candidate in candidates.items():
         citation = candidate["citation"]
@@ -289,17 +289,19 @@ async def search_pdf_pages(memory, question: str, limit: int = 10) -> tuple["Mem
         # pages returned by the full question and several focused searches.
         score = weighted_overlap * 100.0 + overlap * 5.0 + float(candidate["variant_score"]) * 10.0
         score -= int(candidate["full_rank"]) / 10_000.0
+        ranked_candidates.append((score, citation))
+
+    ranked_candidates.sort(key=lambda row: (-row[0], row[1].entry_id, row[1].entry_version_id))
+    results: list[MemoryCitation] = []
+    seen_pages: set[tuple[str, str]] = set()
+    # Only the strongest candidates need a citation readback. This keeps a broad
+    # lexical pool from turning one question into hundreds of database round trips.
+    for _score, citation in ranked_candidates[: max(limit * 5, 100)]:
         entry = await memory.get(GetMemoryEntryRequest(citation=citation))
         references = tuple(reference for reference in entry.entry.sources if reference.source_type == PDF_PAGE_SOURCE_NAME)
         if not references:
             continue
         page_identity = (references[0].source_type, references[0].source_id)
-        ranked.append((score, citation, page_identity))
-
-    ranked.sort(key=lambda row: (-row[0], row[2]))
-    results: list[MemoryCitation] = []
-    seen_pages: set[tuple[str, str]] = set()
-    for _score, citation, page_identity in ranked:
         if page_identity in seen_pages:
             continue
         seen_pages.add(page_identity)
