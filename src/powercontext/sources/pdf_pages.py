@@ -142,6 +142,12 @@ class PDFPageSource(Source):
 
     @model_validator(mode="after")
     def validate_source_identity(self) -> PDFPageSource:
+        PDFPageInput(
+            document_id=self.document_id,
+            document_sha256=self.document_sha256,
+            page_number=self.page_number,
+            text=self.text,
+        )
         if self.name != self.source_id:
             raise ValueError("name and source_id must match")
         if self.source_id != pdf_page_source_id(self.document_id, self.document_sha256, self.page_number):
