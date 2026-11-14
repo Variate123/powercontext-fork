@@ -118,6 +118,10 @@ def parse_pdf_document(value: PDFDocumentInput) -> tuple[PDFPageInput, ...]:
                 text = ""
             if not isinstance(text, str):
                 raise ValueError("PDF page text is not text")
+            # Layout whitespace is not evidence. Compacting runs of whitespace
+            # preserves every lexical token and table number while keeping the
+            # projected page usable by bounded Memory extractors.
+            text = " ".join(text.split())
             pages.append(
                 PDFPageInput(
                     document_id=value.document_id,
@@ -236,6 +240,10 @@ async def search_pdf_pages(memory, question: str, limit: int = 10) -> tuple["Mem
         variants.append(head)
         if tail != head:
             variants.append(tail)
+        for term in sorted(terms, key=lambda item: (-len(item), item))[:2]:
+            if term not in variants:
+                variants.append(term)
+    elif len(terms) > 2:
         for term in sorted(terms, key=lambda item: (-len(item), item))[:2]:
             if term not in variants:
                 variants.append(term)
