@@ -90,6 +90,12 @@ from powercontext.builtin.runtime.composition import (
     open_builtin_runtime,
     preflight_builtin_runtime,
 )
+from powercontext.builtin.runtime.context_pack import (
+    ContextPack,
+    ContextPackDelta,
+    ContextPackError,
+    apply_context_pack_delta,
+)
 from powercontext.builtin.runtime.config import (
     BuiltinConfig,
     DatabaseConfig,
@@ -223,6 +229,9 @@ __all__ = [
     "BuiltinConfig",
     "BuiltinConfigurationError",
     "BuiltinRuntime",
+    "ContextPack",
+    "ContextPackDelta",
+    "ContextPackError",
     "CachedReadinessProbe",
     "CandidateFamilyCount",
     "CandidateInventoryStatistics",
@@ -379,6 +388,7 @@ __all__ = [
     "UsageStatistics",
     "WorkApplication",
     "build_memory_write_gate",
+    "apply_context_pack_delta",
     "dependency_readiness_probe",
     "open_builtin_contexts",
     "open_builtin_runtime",
