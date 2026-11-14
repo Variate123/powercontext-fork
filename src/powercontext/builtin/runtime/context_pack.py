@@ -191,7 +191,7 @@ def apply_context_pack_delta(base: ContextPack, delta: ContextPackDelta) -> Cont
         raise ContextPackError("delta application requires pack and delta")
     if base.digest != delta.base_digest:
         raise ContextPackError("base digest mismatch")
-    if delta.prefix_items > len(base.items):
+    if type(delta.prefix_items) is not int or delta.prefix_items < 0 or delta.prefix_items > len(base.items):
         raise ContextPackError("delta prefix exceeds base items")
     target = ContextPack.build(base.items[: delta.prefix_items] + delta.appended)
     if target.digest != delta.target_digest:
