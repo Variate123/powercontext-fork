@@ -37,10 +37,12 @@ from powercontext.builtin.inference.protocols import (
     StructuredGenerator,
     embed_query,
 )
+from powercontext.builtin.inference.coalescing import CoalescingEmbeddingModel
 from powercontext.builtin.inference.tokens import TokenEstimator, TokenEstimatorProfile, character_token_estimator
 
 __all__ = [
     "EmbeddingModel",
+    "CoalescingEmbeddingModel",
     "EmbeddingResult",
     "EmbeddingVector",
     "GenerationResult",
